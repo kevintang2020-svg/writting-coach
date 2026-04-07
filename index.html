@@ -1,0 +1,607 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#0F6E56;--teal-light:#E1F5EE;--teal-mid:#1D9E75;
+  --amber:#BA7517;--amber-light:#FAEEDA;--amber-mid:#EF9F27;
+  --navy:#042C53;--blue-light:#E6F1FB;
+  --ink:#2C2C2A;--muted:#888780;--border:#D3D1C7;
+  --bg:#F8F6F1;--white:#fff;
+  --red:#E24B4A;--red-light:#FCEBEB;
+  --green:#3B6D11;--green-light:#EAF3DE;
+  --purple:#534AB7;--purple-light:#EEEDFE;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);display:flex;flex-direction:column;align-items:center;padding:1.5rem 1rem 2rem;min-height:100vh;color:var(--ink)}
+.scene{display:flex;flex-direction:column;align-items:center;gap:1.5rem;width:100%;max-width:900px}
+.top-nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%}
+.nav-btn{padding:6px 14px;font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid var(--border);border-radius:20px;background:var(--white);color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap}
+.nav-btn.active,.nav-btn:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+.phone-wrap{position:relative;width:360px;flex-shrink:0}
+.phone-frame{background:#1a1a1a;border-radius:40px;padding:10px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.phone-screen{background:var(--bg);border-radius:32px;overflow:hidden;height:720px;position:relative;display:flex;flex-direction:column}
+.status-bar{background:var(--white);padding:10px 20px 6px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.status-bar span{font-size:11px;font-weight:500;color:var(--ink)}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{display:flex}
+.bottom-bar{background:var(--white);border-top:1px solid var(--border);padding:8px 4px 4px;display:flex;justify-content:space-around;flex-shrink:0}
+.tab-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;cursor:pointer;border-radius:10px;transition:all .2s;flex:1}
+.tab-item svg{width:20px;height:20px}
+.tab-item span{font-size:9px;font-weight:500;color:var(--muted)}
+.tab-item.active span{color:var(--teal)}
+.tab-item.active svg path,.tab-item.active svg rect,.tab-item.active svg circle{fill:var(--teal)}
+.tab-item svg path,.tab-item svg rect,.tab-item svg circle{fill:var(--muted)}
+
+/* WELCOME */
+.welcome-bg{background:linear-gradient(160deg,var(--navy) 0%,var(--teal) 100%);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;gap:1.5rem}
+.app-logo{font-family:'DM Serif Display',serif;font-size:28px;color:#fff;text-align:center;line-height:1.2}
+.app-logo small{display:block;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:300;color:rgba(255,255,255,.7);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.tag-line{font-size:13px;color:rgba(255,255,255,.75);text-align:center;line-height:1.6;max-width:240px}
+.social-btn{width:100%;padding:12px;border-radius:12px;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s}
+.social-btn:active{transform:scale(.97)}
+.btn-google{background:#fff;color:var(--ink)}
+.btn-apple{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.btn-wechat{background:#07C160;color:#fff}
+.social-btns{display:flex;flex-direction:column;gap:8px;width:100%}
+.divider-row{display:flex;align-items:center;gap:8px;width:100%}
+.divider-row span{font-size:11px;color:rgba(255,255,255,.5)}
+.divider-line{flex:1;height:1px;background:rgba(255,255,255,.2)}
+.disclaimer{font-size:10px;color:rgba(255,255,255,.45);text-align:center;line-height:1.5}
+
+/* ONBOARDING */
+.ob-header{background:var(--white);padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.ob-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--ink);margin-bottom:4px}
+.ob-sub{font-size:12px;color:var(--muted);line-height:1.5}
+.ob-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px;flex:1}
+.field-group{display:flex;flex-direction:column;gap:5px}
+.field-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.field-select{appearance:none;-webkit-appearance:none;width:100%;padding:10px 36px 10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888780' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;cursor:pointer}
+.field-select:focus{outline:none;border-color:var(--teal)}
+.coppa-box{background:var(--amber-light);border-radius:10px;border:1px solid #FAC775;padding:10px 12px;display:flex;gap:8px;align-items:flex-start}
+.coppa-box p{font-size:11px;color:var(--amber);line-height:1.55}
+.ob-footer{padding:16px 20px;background:var(--white);border-top:1px solid var(--border)}
+.cta-btn{width:100%;padding:14px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:transform .15s}
+.cta-btn:active{transform:scale(.98)}
+.step-dots{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
+.step-dot{width:6px;height:6px;border-radius:3px;background:var(--border)}
+.step-dot.active{width:18px;background:var(--teal)}
+.native-badge{display:inline-block;background:var(--teal-light);color:var(--teal);border-radius:6px;font-size:10px;font-weight:600;padding:2px 7px;margin-left:6px}
+
+/* HOME */
+.home-header{background:var(--white);padding:16px 20px 12px;display:flex;justify-content:space-between;align-items:center}
+.home-greeting{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink)}
+.home-greeting small{display:block;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);font-weight:400}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+.home-body{padding:16px 20px;display:flex;flex-direction:column;gap:16px;flex:1}
+.section-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.new-doc-card{background:var(--teal);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;cursor:pointer;position:relative;overflow:hidden}
+.new-doc-card::after{content:'';position:absolute;right:-20px;top:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)}
+.new-doc-card h3{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;line-height:1.3}
+.new-doc-card p{font-size:12px;color:rgba(255,255,255,.8);line-height:1.5}
+.new-doc-btn{background:#fff;color:var(--teal);border:none;padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start}
+.last-essay-card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.last-essay-info h4{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px}
+.last-essay-info p{font-size:11px;color:var(--muted)}
+.score-circle{width:46px;height:46px;border-radius:50%;background:var(--teal-light);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.score-circle span{font-size:16px;font-weight:700;color:var(--teal);line-height:1}
+.score-circle small{font-size:9px;color:var(--teal-mid)}
+.writing-tips{display:flex;flex-direction:column;gap:8px}
+.tip-card{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:12px 14px;cursor:pointer}
+.tip-card .tip-tag{font-size:10px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.tip-card p{font-size:12px;color:var(--ink);line-height:1.5}
+
+/* IMPORT */
+.import-header{background:var(--white);padding:14px 20px;border-bottom:1px solid var(--border)}
+.import-header h2{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink)}
+.import-header p{font-size:12px;color:var(--muted);margin-top:2px}
+.import-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px;flex:1}
+.type-row{display:flex;gap:8px;flex-wrap:wrap}
+.type-chip{padding:7px 12px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;background:var(--white)}
+.type-chip.sel{border-color:var(--teal);background:var(--teal-light);color:var(--teal)}
+.upload-zone{border:2px dashed var(--border);border-radius:14px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;background:var(--white)}
+.upload-icon{width:44px;height:44px;border-radius:12px;background:var(--teal-light);display:flex;align-items:center;justify-content:center}
+.upload-zone h4{font-size:14px;font-weight:500;color:var(--ink)}
+.upload-zone p{font-size:11px;color:var(--muted);text-align:center}
+.or-row{display:flex;align-items:center;gap:8px}
+.or-row span{font-size:11px;color:var(--muted)}
+.or-line{flex:1;height:1px;background:var(--border)}
+.paste-area{border:1.5px solid var(--border);border-radius:12px;padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--white);resize:none;height:90px;width:100%}
+.paste-area:focus{outline:none;border-color:var(--teal)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.photo-thumb{border-radius:8px;background:var(--teal-light);border:2px solid var(--teal);aspect-ratio:3/4;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--teal);gap:3px;font-weight:500;position:relative}
+.photo-thumb.add{background:var(--white);border:2px dashed var(--border);color:var(--muted)}
+.page-label{position:absolute;bottom:4px;left:4px;background:rgba(255,255,255,.9);border-radius:4px;font-size:9px;padding:1px 4px;color:var(--teal);font-weight:600}
+.preview-box{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:12px 14px}
+.preview-text{font-size:12px;color:var(--ink);line-height:1.7;max-height:70px;overflow:hidden;position:relative}
+.preview-text::after{content:'';position:absolute;bottom:0;left:0;right:0;height:28px;background:linear-gradient(transparent,var(--white))}
+.preview-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
+
+/* RESULTS */
+.result-header{background:var(--white);padding:14px 20px 0}
+.result-header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.result-header-top h2{font-family:'DM Serif Display',serif;font-size:16px;color:var(--ink)}
+.tag-pill{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;background:var(--amber-light);color:var(--amber)}
+.score-header{display:flex;align-items:center;gap:16px;padding-bottom:14px}
+.big-score{font-family:'DM Serif Display',serif;font-size:56px;color:var(--teal);line-height:1}
+.score-meta{display:flex;flex-direction:column;gap:3px}
+.score-grade{font-size:12px;font-weight:500;color:var(--ink)}
+.score-mode{font-size:11px;color:var(--muted)}
+.tabs{display:flex;border-bottom:2px solid var(--border)}
+.tab-pill{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab-pill.active{color:var(--teal);border-bottom-color:var(--teal)}
+.result-body{padding:14px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
+
+/* RUBRIC CARDS — full width stacked */
+.dim-card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:12px 14px;width:100%}
+.dim-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.dim-name{font-size:13px;font-weight:500;color:var(--ink)}
+.dim-score-box{display:flex;align-items:baseline;gap:3px}
+.dim-score{font-size:18px;font-weight:700;color:var(--teal)}
+.dim-max{font-size:11px;color:var(--muted)}
+.progress-bar{height:7px;background:var(--teal-light);border-radius:4px;overflow:hidden;margin-bottom:7px}
+.progress-fill{height:100%;border-radius:4px;background:var(--teal)}
+.dim-comment{font-size:11px;color:var(--muted);line-height:1.55}
+.dim-comment .en{color:var(--ink)}
+.dim-comment .cn{color:var(--muted);margin-top:3px;display:block}
+
+/* SENTENCE EDITS */
+.sentence-fix{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.fix-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:4px;align-self:flex-start}
+.fix-label.err{background:var(--red-light);color:var(--red)}
+.fix-label.gram{background:var(--amber-light);color:var(--amber)}
+.fix-label.vocab{background:var(--purple-light);color:var(--purple)}
+.sent-orig{font-size:11px;color:var(--red);text-decoration:line-through;line-height:1.6}
+.sent-fix{font-size:11px;color:var(--green);line-height:1.6}
+.sent-why{font-size:10px;color:var(--muted);line-height:1.4;padding-top:5px;border-top:1px solid var(--border)}
+
+.version-banner{background:var(--teal-light);border-radius:12px;padding:14px}
+.version-label{font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.version-text{font-size:12px;color:var(--ink);line-height:1.7}
+.version-text mark{background:var(--amber-light);color:var(--amber);border-radius:2px;padding:0 2px}
+.action-row{display:flex;gap:8px}
+.action-btn{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--ink);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.action-btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+/* HISTORY */
+.hist-header{background:var(--white);padding:14px 20px;border-bottom:1px solid var(--border)}
+.hist-header h2{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink)}
+.hist-body{padding:14px 20px;display:flex;flex-direction:column;gap:14px;flex:1}
+.chart-card{background:var(--white);border-radius:14px;border:1px solid var(--border);padding:14px}
+.chart-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.mini-chart{position:relative;height:90px;display:flex;align-items:flex-end;gap:6px;padding:0 4px}
+.bar-wrap{display:flex;flex-direction:column;align-items:center;flex:1;gap:3px}
+.bar{border-radius:4px 4px 0 0;background:var(--teal-light);width:100%;min-height:4px}
+.bar.hi{background:var(--teal)}
+.bar-label{font-size:9px;color:var(--muted);white-space:nowrap}
+.bar-score{font-size:9px;color:var(--teal);font-weight:600}
+.progress-card{background:var(--teal);border-radius:12px;padding:14px}
+.progress-card h4{font-family:'DM Serif Display',serif;font-size:14px;color:#fff;margin-bottom:6px}
+.progress-card p{font-size:11px;color:rgba(255,255,255,.85);line-height:1.6}
+.hist-list{display:flex;flex-direction:column;gap:8px}
+.hist-item{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.hist-item-info h4{font-size:13px;font-weight:500;color:var(--ink)}
+.hist-item-info p{font-size:11px;color:var(--muted)}
+.hist-item-score strong{font-size:16px;font-weight:700;color:var(--teal)}
+.hist-item-score span{display:block;font-size:9px;color:var(--muted);text-align:right}
+
+/* FAVORITES */
+.fav-header{background:var(--white);padding:14px 20px;border-bottom:1px solid var(--border)}
+.fav-header h2{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink)}
+.fav-tabs{display:flex;gap:6px;padding:10px 20px;background:var(--white);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.fav-tab{padding:6px 12px;border-radius:20px;border:1px solid var(--border);font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;background:var(--white)}
+.fav-tab.active{background:var(--amber-light);color:var(--amber);border-color:#FAC775}
+.fav-body{padding:14px 20px;display:flex;flex-direction:column;gap:8px;flex:1}
+.fav-item{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:12px 14px}
+.fav-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.fav-meta span{font-size:10px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.3px}
+.fav-item p{font-size:12px;color:var(--ink);line-height:1.6}
+.fav-item .fav-note{font-size:10px;color:var(--muted);margin-top:5px;font-style:italic}
+</style>
+
+<div class="scene">
+  <div class="top-nav">
+    <button class="nav-btn active" onclick="goto('welcome')">① Welcome</button>
+    <button class="nav-btn" onclick="goto('onboarding')">② Onboarding</button>
+    <button class="nav-btn" onclick="goto('home')">③ Home</button>
+    <button class="nav-btn" onclick="goto('import')">④ Import</button>
+    <button class="nav-btn" onclick="goto('results')">⑤ Results</button>
+    <button class="nav-btn" onclick="goto('history')">⑥ History</button>
+    <button class="nav-btn" onclick="goto('favorites')">⑦ Favorites</button>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>●●●●○  WiFi ▌</span></div>
+
+        <!-- WELCOME -->
+        <div class="screen active" id="s-welcome">
+          <div class="welcome-bg">
+            <div style="text-align:center;margin-bottom:8px">
+              <div style="width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="6" width="18" height="20" rx="3" fill="rgba(255,255,255,0.9)"/><rect x="10" y="10" width="10" height="1.5" rx=".75" fill="#0F6E56"/><rect x="10" y="13.5" width="8" height="1.5" rx=".75" fill="#0F6E56"/><rect x="10" y="17" width="6" height="1.5" rx=".75" fill="#0F6E56"/><circle cx="23" cy="22" r="6" fill="#EF9F27"/><path d="M20.5 22l1.8 1.8 3-3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="app-logo">Writing Coach AI<small>North American Writing Standards</small></div>
+            </div>
+            <p class="tag-line">AI-powered English writing coach graded to authentic North American academic standards.</p>
+            <div class="social-btns">
+              <button class="social-btn btn-google" onclick="goto('onboarding')">
+                <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Continue with Google
+              </button>
+              <button class="social-btn btn-apple" onclick="goto('onboarding')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                Continue with Apple
+              </button>
+              <button class="social-btn btn-wechat" onclick="goto('onboarding')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8.7 11.1c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm4.6 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-9 5.8c-2.26-1.3-3.8-3.6-3.8-6.2C.5 6.16 4.76 2.5 10 2.5c4.95 0 9 3.36 9 7.5 0 .53-.06 1.04-.17 1.55C17.7 11.2 16.5 11 15.3 11c-3.59 0-6.5 2.43-6.5 5.5 0 .13.01.26.02.39-.54-.17-1.06-.43-1.52-.79l-1.4.4.4-1.3-.1-.3z"/><path d="M15.3 13c-2.49 0-4.5 1.79-4.5 4s2.01 4 4.5 4c.72 0 1.4-.18 2-.48l1.13.48-.3-1.1c.74-.69 1.17-1.66 1.17-2.9 0-2.21-2.01-4-4.5-4zm-1.5 4.5c-.41 0-.75-.34-.75-.75s.34-.75.75-.75.75.34.75.75-.34.75-.75.75zm3 0c-.41 0-.75-.34-.75-.75s.34-.75.75-.75.75.34.75.75-.34.75-.75.75z"/></svg>
+                Continue with WeChat
+              </button>
+              <div class="divider-row"><div class="divider-line"></div><span>or</span><div class="divider-line"></div></div>
+              <button class="social-btn btn-apple" style="background:rgba(255,255,255,.08)" onclick="goto('onboarding')">Sign in with Email</button>
+            </div>
+            <p class="disclaimer">By continuing you agree to our Terms of Service and Privacy Policy. Users under 13 require parental consent.</p>
+          </div>
+        </div>
+
+        <!-- ONBOARDING — 变更：去掉Region，去掉Mode，Grade Level更新，新增COPPA提示 -->
+        <div class="screen" id="s-onboarding">
+          <div class="ob-header">
+            <div class="ob-title">Set up your profile</div>
+            <div class="ob-sub">Personalise scoring and coaching to your level. You can change these anytime.</div>
+          </div>
+          <div class="ob-body">
+            <!-- COPPA Notice -->
+            <div class="coppa-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="#BA7517" stroke-width="1.8"/><path d="M12 8v4M12 16h.01" stroke="#BA7517" stroke-width="2" stroke-linecap="round"/></svg>
+              <p>If you are under 13, please have a parent or guardian complete this setup and agree to our Privacy Policy on your behalf.</p>
+            </div>
+            <div class="field-group">
+              <div class="field-label">Native Language</div>
+              <select class="field-select" id="lang-sel" onchange="updateCoachLang()">
+                <option>English</option><option selected>Chinese</option><option>Spanish</option><option>Hindi</option><option>Bengali</option><option>Portuguese</option><option>Russian</option><option>Japanese</option><option>Western Punjabi</option><option>German</option><option>Korean</option>
+              </select>
+            </div>
+            <!-- 变更2：Grade Level（非Child's），选项扩展 -->
+            <div class="field-group">
+              <div class="field-label">Grade Level</div>
+              <select class="field-select">
+                <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option selected>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>IELTS Preparation</option><option>TOEFL Preparation</option><option>University / Adult</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <div class="field-label">Coach Language</div>
+              <select class="field-select" id="coach-sel">
+                <option>English</option><option selected>Chinese (母语)</option><option>Bilingual — English + Chinese</option>
+              </select>
+            </div>
+            <!-- 变更3：已删除 Scoring Mode -->
+            <div style="background:var(--teal-light);border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="#0F6E56" stroke-width="1.8"/><path d="M12 16v-4M12 8h.01" stroke="#0F6E56" stroke-width="2" stroke-linecap="round"/></svg>
+              <p style="font-size:11px;color:var(--teal);line-height:1.55">Scoring difficulty is automatically calibrated to your Grade Level and whether English is your native language — no manual adjustment needed.</p>
+            </div>
+          </div>
+          <div class="ob-footer">
+            <div class="step-dots"><div class="step-dot"></div><div class="step-dot active"></div><div class="step-dot"></div></div>
+            <button class="cta-btn" onclick="goto('home')">Start Writing →</button>
+          </div>
+        </div>
+
+        <!-- HOME -->
+        <div class="screen" id="s-home">
+          <div class="home-header">
+            <div class="home-greeting">Good morning<small>Let's improve some writing today</small></div>
+            <div class="avatar" onclick="goto('onboarding')">Li</div>
+          </div>
+          <div class="home-body">
+            <div>
+              <div class="section-title">New Document</div>
+              <div class="new-doc-card" onclick="goto('import')">
+                <h3>Start a new essay analysis</h3>
+                <p>Upload handwritten pages or paste typed text for instant North American grading</p>
+                <button class="new-doc-btn">+ Import Essay</button>
+              </div>
+            </div>
+            <div>
+              <div class="section-title">Last Essay</div>
+              <div class="last-essay-card" onclick="goto('results')">
+                <div class="last-essay-info">
+                  <h4>My Summer Vacation</h4>
+                  <p>Narrative · Grade 8 · Apr 5, 2026</p>
+                </div>
+                <div class="score-circle"><span>82</span><small>/100</small></div>
+              </div>
+            </div>
+            <div>
+              <div class="section-title">Weekly Writing Ideas — Grade 8</div>
+              <div class="writing-tips">
+                <div class="tip-card">
+                  <div class="tip-tag">Narrative</div>
+                  <p>Describe a moment when you felt truly proud of yourself. Use vivid sensory details.</p>
+                </div>
+                <div class="tip-card">
+                  <div class="tip-tag">Argumentative</div>
+                  <p>Should schools ban smartphones in the classroom? Defend your position with evidence.</p>
+                </div>
+                <div class="tip-card">
+                  <div class="tip-tag">Expository</div>
+                  <p>Explain how photosynthesis works to someone who has never studied science.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- IMPORT -->
+        <div class="screen" id="s-import">
+          <div class="import-header">
+            <h2>Import Essay</h2>
+            <p>Upload handwritten photos or paste text</p>
+          </div>
+          <div class="import-body">
+            <div class="field-group">
+              <div class="field-label">Essay Type</div>
+              <div class="type-row">
+                <div class="type-chip sel" onclick="selType(this)">Narrative</div>
+                <div class="type-chip" onclick="selType(this)">Argumentative</div>
+                <div class="type-chip" onclick="selType(this)">Expository</div>
+                <div class="type-chip" onclick="selType(this)">Applied</div>
+              </div>
+            </div>
+            <div class="upload-zone">
+              <div class="upload-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.8" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
+              <h4>Photograph handwriting</h4>
+              <p>Multi-page · drag to reorder</p>
+            </div>
+            <div class="photo-grid">
+              <div class="photo-thumb"><svg width="18" height="22" viewBox="0 0 18 22" fill="none" stroke="#0F6E56" stroke-width="1.2"><rect x="1" y="1" width="16" height="20" rx="2"/><line x1="4" y1="6" x2="14" y2="6"/><line x1="4" y1="10" x2="14" y2="10"/><line x1="4" y1="14" x2="10" y2="14"/></svg><div class="page-label">p.1</div></div>
+              <div class="photo-thumb"><svg width="18" height="22" viewBox="0 0 18 22" fill="none" stroke="#0F6E56" stroke-width="1.2"><rect x="1" y="1" width="16" height="20" rx="2"/><line x1="4" y1="6" x2="14" y2="6"/><line x1="4" y1="10" x2="14" y2="10"/><line x1="4" y1="14" x2="10" y2="14"/></svg><div class="page-label">p.2</div></div>
+              <div class="photo-thumb add"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#888780" stroke-width="1.5"><circle cx="10" cy="10" r="9"/><line x1="10" y1="6" x2="10" y2="14"/><line x1="6" y1="10" x2="14" y2="10"/></svg><span style="font-size:9px">Add page</span></div>
+            </div>
+            <div class="or-row"><div class="or-line"></div><span>or paste text</span><div class="or-line"></div></div>
+            <textarea class="paste-area" placeholder="Paste typed essay here...">Last summer, my family went to Niagara Falls. The roaring sound of the water was incredible and I couldn't believe how big it was. My dad took lots of photos and my mom buyed souvenirs. We ate dinner at a restaurant near the falls. It was very beautiful and I enjoyed it a lot.</textarea>
+            <div class="preview-box">
+              <div class="preview-label">OCR Preview — tap to correct any word</div>
+              <div class="preview-text">Last summer, my family went to Niagara Falls. The roaring sound of the water was incredible and I couldn't believe how big it was. My dad took lots of photos...</div>
+            </div>
+          </div>
+          <div style="padding:12px 20px;background:var(--white);border-top:1px solid var(--border)">
+            <button class="cta-btn" onclick="goto('results')">Start North American Standard Review →</button>
+          </div>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="screen" id="s-results">
+          <div class="result-header">
+            <div class="result-header-top">
+              <h2>Analysis Report</h2>
+              <div class="tag-pill">Narrative</div>
+            </div>
+            <div class="score-header">
+              <div class="big-score">82</div>
+              <div>
+                <div class="score-grade">Grade 8 · Non-native English</div>
+                <!-- 变更3：不再显示 Mode -->
+                <div class="score-mode">OSSLT Baseline · Apr 5, 2026</div>
+                <div style="margin-top:6px"><span style="font-size:10px;background:var(--teal-light);color:var(--teal);padding:3px 8px;border-radius:10px;font-weight:600">↑ +4 from last essay</span></div>
+              </div>
+            </div>
+            <div class="tabs">
+              <div class="tab-pill active" onclick="selTab(this,'tab-rubric')">Rubric</div>
+              <div class="tab-pill" onclick="selTab(this,'tab-fixes')">Edits</div>
+              <div class="tab-pill" onclick="selTab(this,'tab-versions')">Versions</div>
+            </div>
+          </div>
+          <div class="result-body">
+
+            <!-- 变更5：四个维度全部上下排列，full width -->
+            <div id="tab-rubric" style="display:flex;flex-direction:column;gap:8px">
+              <div class="dim-card">
+                <div class="dim-top">
+                  <span class="dim-name">Focus &amp; Ideas</span>
+                  <div class="dim-score-box"><span class="dim-score">24</span><span class="dim-max">/30</span></div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+                <div class="dim-comment">
+                  <span class="en">The central idea — a memorable family trip — is clear. Add a thesis sentence in the opening paragraph to anchor the essay more firmly.</span>
+                  <span class="cn">中心思想清晰，建议在开头加入主题句以增强论点锚定。</span>
+                </div>
+              </div>
+              <div class="dim-card">
+                <div class="dim-top">
+                  <span class="dim-name">Organization</span>
+                  <div class="dim-score-box"><span class="dim-score">19</span><span class="dim-max">/25</span></div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:76%"></div></div>
+                <div class="dim-comment">
+                  <span class="en">Chronological structure is easy to follow. Paragraph transitions are weak — try "Meanwhile," "As the day progressed," or "As a result."</span>
+                  <span class="cn">时间顺序清晰，但段落间过渡词较弱，建议加强逻辑连接。</span>
+                </div>
+              </div>
+              <div class="dim-card">
+                <div class="dim-top">
+                  <span class="dim-name">Language Use</span>
+                  <div class="dim-score-box"><span class="dim-score">26</span><span class="dim-max">/30</span></div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:87%"></div></div>
+                <div class="dim-comment">
+                  <span class="en">Good vocabulary range with varied sentence lengths. Introduce complex sentences using relative clauses to reach the next level.</span>
+                  <span class="cn">词汇丰富，句式多样，引入关系从句可进一步提升至下一级别。</span>
+                </div>
+              </div>
+              <div class="dim-card">
+                <div class="dim-top">
+                  <span class="dim-name">Conventions</span>
+                  <div class="dim-score-box"><span class="dim-score">13</span><span class="dim-max">/15</span></div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:87%"></div></div>
+                <div class="dim-comment">
+                  <span class="en">2 spelling errors detected ("buyed" → "bought"). Comma splice in sentence 4. Overall punctuation is strong.</span>
+                  <span class="cn">发现2处拼写错误，第4句存在逗号粘连，整体标点较好。</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 变更6：更多句子批改，不遗漏 -->
+            <div id="tab-fixes" style="display:none;flex-direction:column;gap:8px">
+              <div class="sentence-fix">
+                <div class="fix-label err">Spelling Error</div>
+                <div class="sent-orig">My dad took lots of photos and my mom buyed souvenirs.</div>
+                <div class="sent-fix">My dad took lots of photos while my mom bought souvenirs.</div>
+                <div class="sent-why">💡 "Buyed" is incorrect — "buy" is an irregular verb; past tense is "bought". Added "while" to create a compound sentence. 不规则动词buy的过去式为bought，非buyed。</div>
+              </div>
+              <div class="sentence-fix">
+                <div class="fix-label gram">Weak Expression</div>
+                <div class="sent-orig">The roaring sound of the water was incredible and I couldn't believe how big it was.</div>
+                <div class="sent-fix">The thunderous roar of the falls was breathtaking; I had never imagined water on such a colossal scale.</div>
+                <div class="sent-why">💡 Replace vague "incredible / big" with precise adjectives. Use a semicolon to join two related independent clauses. 用精确词汇替换模糊形容词，分号连接两个独立从句。</div>
+              </div>
+              <div class="sentence-fix">
+                <div class="fix-label gram">Vague Ending</div>
+                <div class="sent-orig">It was very beautiful and I enjoyed it a lot.</div>
+                <div class="sent-fix">The entire experience was awe-inspiring, and I left with a deep appreciation for nature's power.</div>
+                <div class="sent-why">💡 "Very beautiful" and "enjoyed it a lot" are overused closings. End with a specific reflection or insight to leave a stronger impression. 结尾应有具体感悟，避免空洞的"very beautiful"。</div>
+              </div>
+              <div class="sentence-fix">
+                <div class="fix-label gram">Missing Transition</div>
+                <div class="sent-orig">We ate dinner at a restaurant near the falls.</div>
+                <div class="sent-fix">As evening descended, we settled into a cozy restaurant overlooking the illuminated falls.</div>
+                <div class="sent-why">💡 Add a time-setting opener ("As evening descended") to signal the shift from daytime sightseeing to dinner. Creates scene continuity. 用时间状语从句引导场景过渡，增加叙事连贯性。</div>
+              </div>
+              <div class="sentence-fix">
+                <div class="fix-label vocab">Vocabulary Upgrade</div>
+                <div class="sent-orig">Last summer, my family went to Niagara Falls.</div>
+                <div class="sent-fix">Last summer, my family embarked on a memorable trip to Niagara Falls.</div>
+                <div class="sent-why">💡 "Went to" is too plain for an opening sentence. "Embarked on" signals the essay's importance and hooks the reader from the first line. 开篇句用"embarked on"替代"went to"，立即提升文章档次。</div>
+              </div>
+              <div class="sentence-fix">
+                <div class="fix-label gram">Run-on / Coordination</div>
+                <div class="sent-orig">My dad took lots of photos and my mom buyed souvenirs and we had a great time.</div>
+                <div class="sent-fix">While my father carefully documented every moment through his camera, my mother selected souvenirs — and together, we created lasting memories.</div>
+                <div class="sent-why">💡 Three clauses joined by "and and" creates a run-on. Use a "while" clause + dash structure for sophistication. 三个"and"连接的句子是流水句，用while从句和破折号结构改善。</div>
+              </div>
+            </div>
+
+            <div id="tab-versions" style="display:none;flex-direction:column;gap:8px">
+              <div style="display:flex;gap:6px">
+                <button class="action-btn" onclick="selVer(this,'ver-orig')" id="vbtn-orig" style="font-size:11px">Original</button>
+                <button class="action-btn" onclick="selVer(this,'ver-refined')" id="vbtn-refined" style="font-size:11px">Refined</button>
+                <button class="action-btn primary" onclick="selVer(this,'ver-elevated')" id="vbtn-elev" style="font-size:11px">Elevated ↑</button>
+              </div>
+              <div class="version-banner" id="ver-orig" style="display:none">
+                <div class="version-label">V1 — Original</div>
+                <div class="version-text">Last summer, my family went to Niagara Falls. The roaring sound of the water was incredible and I couldn't believe how big it was. My dad took lots of photos and my mom buyed souvenirs. We ate dinner at a restaurant near the falls. It was very beautiful and I enjoyed it a lot.</div>
+              </div>
+              <div class="version-banner" id="ver-refined" style="display:none;background:var(--blue-light)">
+                <div class="version-label" style="color:var(--navy)">V2 — Refined</div>
+                <div class="version-text">Last summer, my family <mark>visited</mark> Niagara Falls. The <mark>thunderous</mark> roar of the water was <mark>breathtaking</mark>; I had never imagined a waterfall of such <mark>colossal</mark> scale. My dad took lots of photos while my mom <mark>bought</mark> souvenirs. We ate dinner at a restaurant near the falls. It was <mark>a truly awe-inspiring</mark> experience and I <mark>left with lasting memories</mark>.</div>
+              </div>
+              <div class="version-banner" id="ver-elevated" style="background:var(--purple-light)">
+                <div class="version-label" style="color:var(--purple)">V3 — Elevated (+1 Level)</div>
+                <div class="version-text" style="color:#26215C">Last summer, my family <mark>embarked on a memorable journey to</mark> Niagara Falls — a spectacle that surpassed every expectation. <mark>Standing at the railing, enveloped in cool mist,</mark> I felt an almost overwhelming sense of nature's raw power; I had never imagined water on such a colossal scale. <mark>While my father meticulously documented each moment through his camera lens,</mark> my mother selected keepsakes with quiet deliberateness. As evening descended, we settled into a cozy restaurant overlooking the <mark>illuminated</mark> falls. <mark>The entire experience left me with a profound appreciation for the natural world</mark>.</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:10px 20px;background:var(--white);border-top:1px solid var(--border)">
+            <div class="action-row">
+              <button class="action-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
+              <button class="action-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</button>
+              <button class="action-btn primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="screen" id="s-history">
+          <div class="hist-header"><h2>Progress History</h2></div>
+          <div class="hist-body">
+            <div class="chart-card">
+              <div class="chart-title">Score trend — all essays</div>
+              <div class="mini-chart">
+                <div class="bar-wrap"><div class="bar" style="height:52px"></div><div class="bar-score">65</div><div class="bar-label">Jan</div></div>
+                <div class="bar-wrap"><div class="bar" style="height:58px"></div><div class="bar-score">72</div><div class="bar-label">Feb</div></div>
+                <div class="bar-wrap"><div class="bar" style="height:62px"></div><div class="bar-score">78</div><div class="bar-label">Mar</div></div>
+                <div class="bar-wrap"><div class="bar hi" style="height:66px"></div><div class="bar-score" style="color:var(--teal);font-weight:700">82</div><div class="bar-label">Apr</div></div>
+              </div>
+            </div>
+            <div class="progress-card">
+              <h4>Coach's Progress Note</h4>
+              <p>Strong consistent improvement in Language Use over the past 4 essays (+12 pts). Organization remains the primary growth area — focus on transition sentences and paragraph hooks. The jump from 72→82 this month shows real momentum. 词汇与句式进步显著，建议本月重点训练段落过渡技巧。</p>
+            </div>
+            <div class="hist-list">
+              <div class="hist-item" onclick="goto('results')"><div class="hist-item-info"><h4>My Summer Vacation</h4><p>Narrative · Apr 5, 2026</p></div><div class="hist-item-score"><strong>82</strong><span>Grade 8</span></div></div>
+              <div class="hist-item" onclick="goto('results')"><div class="hist-item-info"><h4>Should Schools Ban Phones?</h4><p>Argumentative · Mar 18, 2026</p></div><div class="hist-item-score"><strong>78</strong><span>Grade 8</span></div></div>
+              <div class="hist-item" onclick="goto('results')"><div class="hist-item-info"><h4>How Volcanoes Form</h4><p>Expository · Feb 28, 2026</p></div><div class="hist-item-score"><strong>72</strong><span>Grade 8</span></div></div>
+              <div class="hist-item" onclick="goto('results')"><div class="hist-item-info"><h4>A Day I'll Never Forget</h4><p>Narrative · Jan 10, 2026</p></div><div class="hist-item-score"><strong>65</strong><span>Grade 8</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAVORITES -->
+        <div class="screen" id="s-favorites">
+          <div class="fav-header"><h2>My Collection</h2></div>
+          <div class="fav-tabs">
+            <div class="fav-tab active" onclick="selFavTab(this)">Vocabulary</div>
+            <div class="fav-tab" onclick="selFavTab(this)">Sentence Patterns</div>
+            <div class="fav-tab" onclick="selFavTab(this)">Logic Connectors</div>
+            <div class="fav-tab" onclick="selFavTab(this)">Full Snippets</div>
+          </div>
+          <div class="fav-body">
+            <div class="fav-item"><div class="fav-meta"><span>Vocabulary</span></div><p><strong>Colossal</strong> — extremely large in size or extent</p><div class="fav-note">From: My Summer Vacation · 庞大的；巨大的</div></div>
+            <div class="fav-item"><div class="fav-meta"><span>Vocabulary</span></div><p><strong>Embarked on</strong> — began a significant journey or undertaking</p><div class="fav-note">From: My Summer Vacation · 踏上；开始（旅程）</div></div>
+            <div class="fav-item"><div class="fav-meta"><span>Vocabulary</span></div><p><strong>Awe-inspiring</strong> — causing wonder and deep respect</p><div class="fav-note">From: My Summer Vacation · 令人叹为观止的</div></div>
+          </div>
+        </div>
+
+        <!-- BOTTOM BAR -->
+        <div class="bottom-bar" id="bottom-bar">
+          <div class="tab-item active" id="tab-home" onclick="goto('home')"><svg viewBox="0 0 24 24" fill="none"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" fill="currentColor"/></svg><span>Home</span></div>
+          <div class="tab-item" id="tab-import" onclick="goto('import')"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 8v8M8 12l4-4 4 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><span>Import</span></div>
+          <div class="tab-item" id="tab-history" onclick="goto('history')"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" fill="currentColor"/><path d="M8 2v4M16 2v4M3 10h18" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="16" r="2" fill="#fff"/></svg><span>History</span></div>
+          <div class="tab-item" id="tab-favorites" onclick="goto('favorites')"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/></svg><span>Collection</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var screenMap={welcome:'s-welcome',onboarding:'s-onboarding',home:'s-home',import:'s-import',results:'s-results',history:'s-history',favorites:'s-favorites'};
+var tabMap={home:'tab-home',import:'tab-import',history:'tab-history',favorites:'tab-favorites'};
+var bottomHide=['welcome','onboarding'];
+var navBtns=document.querySelectorAll('.nav-btn');
+function goto(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(screenMap[name]).classList.add('active');
+  navBtns.forEach((b,i)=>{var l=['welcome','onboarding','home','import','results','history','favorites'];b.classList.toggle('active',l[i]===name)});
+  var bar=document.getElementById('bottom-bar');
+  bar.style.display=bottomHide.includes(name)?'none':'flex';
+  Object.values(tabMap).forEach(id=>document.getElementById(id).classList.remove('active'));
+  if(tabMap[name])document.getElementById(tabMap[name]).classList.add('active');
+}
+function selType(el){document.querySelectorAll('.type-chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel')}
+function updateCoachLang(){
+  var lang=document.getElementById('lang-sel').value;
+  var sel=document.getElementById('coach-sel');
+  if(lang==='English'){sel.innerHTML='<option>English</option>';sel.selectedIndex=0;return;}
+  sel.innerHTML='<option>English</option><option>'+lang+' (母语)</option><option>Bilingual — English + '+lang+'</option>';
+  sel.selectedIndex=1;
+}
+function selTab(el,tabId){
+  document.querySelectorAll('.tab-pill').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  ['tab-rubric','tab-fixes','tab-versions'].forEach(id=>{
+    var d=document.getElementById(id);
+    if(d)d.style.display=id===tabId?'flex':'none';
+  });
+}
+function selVer(el,verId){
+  ['ver-orig','ver-refined','ver-elevated'].forEach(id=>{var d=document.getElementById(id);if(d)d.style.display=id===verId?'block':'none'});
+  ['vbtn-orig','vbtn-refined','vbtn-elev'].forEach(id=>{var b=document.getElementById(id);if(b)b.classList.remove('primary')});
+  el.classList.add('primary');
+}
+function selFavTab(el){document.querySelectorAll('.fav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active')}
+selVer(document.getElementById('vbtn-elev'),'ver-elevated');
+</script>
