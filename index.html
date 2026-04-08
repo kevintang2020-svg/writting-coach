@@ -382,7 +382,8 @@ textarea:focus{outline:none;border-color:var(--teal)}
   <div class="camera-controls">
     <button class="camera-cancel" onclick="closeCamera()">Cancel</button>
     <button class="capture-btn" onclick="capturePhoto()"></button>
-    <div class="camera-count" id="camera-count">0 pages</div>
+    <button class="camera-cancel" id="camera-done-btn" onclick="cameraDone()" style="display:none;background:var(--teal);color:#fff;padding:8px 16px;border-radius:20px;font-weight:600">Done ✓</button>
+    <div class="camera-count" id="camera-count" style="display:block">0 pages</div>
   </div>
 </div>
 
@@ -500,7 +501,7 @@ textarea:focus{outline:none;border-color:var(--teal)}
 // ════════════════════════════════════════════════
 // CONFIG
 // ════════════════════════════════════════════════
-const GEMINI_KEY = 'AIzaSyBD8ThZi_R3qAZ7OkOS7tKoZqpTf8jNAHg';
+const GEMINI_KEY = 'AIzaSyATow8cJYzgqsRj9GoF8sJr9k94zv1ZLJw';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
 
 // ════════════════════════════════════════════════
@@ -702,6 +703,10 @@ async function openCamera() {
 function closeCamera() {
   if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
   document.getElementById('camera-screen').classList.remove('active');
+  // Reset camera UI state
+  document.getElementById('camera-done-btn').style.display = 'none';
+  document.getElementById('camera-count').style.display = 'block';
+  updateCameraCount();
 }
 
 function capturePhoto() {
@@ -715,6 +720,18 @@ function capturePhoto() {
   updateCameraCount();
   updatePhotoGrid();
   showToast(`Page ${app.capturedImages.length} captured`);
+  // Show Done button after first capture
+  document.getElementById('camera-done-btn').style.display = 'block';
+  document.getElementById('camera-count').style.display = 'none';
+}
+
+async function cameraDone() {
+  // Close camera and trigger OCR on all captured images
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  document.getElementById('camera-screen').classList.remove('active');
+  if (app.capturedImages.length > 0) {
+    await runOCRAll();
+  }
 }
 
 function updateCameraCount() {
@@ -757,49 +774,88 @@ function removePhoto(i) {
   }
 }
 
-async function runOCR() {
-  showToast('Recognising handwriting...');
-  try {
-    const imageData = app.capturedImages[app.capturedImages.length - 1];
-    const base64 = imageData.split(',')[1];
-    const mimeType = imageData.split(';')[0].split(':')[1];
-    const result = await callGeminiVision(
-      'Please extract ALL the text from this handwritten essay image. Return ONLY the extracted text, preserving paragraphs with line breaks. Do not add any commentary.',
-      base64, mimeType
-    );
-    const prev = document.getElementById('ocr-text').value;
-    document.getElementById('ocr-text').value = prev ? prev + '\n' + result : result;
-    document.getElementById('ocr-preview-container').style.display = 'block';
-    closeCamera();
-    showToast('Text recognised! Please review.');
-  } catch(e) {
-    showToast('Recognition failed. Please check the image and try again.');
-    closeCamera();
+async function runOCRAll() {
+  showToast('Recognising text from ' + app.capturedImages.length + ' page(s)...');
+  document.getElementById('ocr-preview-container').style.display = 'block';
+  document.getElementById('ocr-text').value = 'Recognising handwriting, please wait...';
+
+  let allText = '';
+  for (let i = 0; i < app.capturedImages.length; i++) {
+    try {
+      const imageData = app.capturedImages[i];
+      const base64 = imageData.split(',')[1];
+      const mimeType = imageData.split(';')[0].split(':')[1];
+      const result = await callGeminiVision(
+        'Please extract ALL the handwritten or printed text from this essay image exactly as written. Return ONLY the text content, preserving paragraph breaks with blank lines. Do not summarise, correct, or add any commentary.',
+        base64, mimeType
+      );
+      if (result && result.trim()) {
+        allText += (allText ? '\n\n' : '') + result.trim();
+      }
+    } catch(e) {
+      console.error('OCR failed for page', i+1, e);
+    }
   }
+
+  if (allText) {
+    document.getElementById('ocr-text').value = allText;
+    showToast('Text recognised! Please review before submitting.');
+  } else {
+    document.getElementById('ocr-text').value = '';
+    document.getElementById('ocr-preview-container').style.display = 'none';
+    showToast('Could not recognise text. Please paste the essay manually below.');
+  }
+}
+
+async function runOCR() {
+  await runOCRAll();
 }
 
 // ════════════════════════════════════════════════
 // SUBMIT & GRADE
 // ════════════════════════════════════════════════
 async function submitEssay() {
-  let essayText = '';
+  // Collect text from ALL possible sources
   const ocrText = document.getElementById('ocr-text').value.trim();
   const pastedText = document.getElementById('essay-text').value.trim();
-  essayText = ocrText || pastedText;
 
+  // Filter out placeholder messages
+  const isPlaceholder = ocrText === 'Recognising handwriting, please wait...';
+  const essayText = (!isPlaceholder && ocrText) ? ocrText : pastedText;
+
+  // Check if OCR is still running
+  if (isPlaceholder) {
+    showToast('Please wait — text recognition is still in progress...');
+    return;
+  }
+
+  // Check if we have any content
   if (!essayText) {
-    showToast('Please add your essay text first.');
-    return;
-  }
-  if (essayText.split(' ').length < 20) {
-    showToast('Essay seems too short. Please write at least a paragraph.');
+    if (app.capturedImages.length > 0) {
+      showToast('Photos captured but text not yet recognised. Please wait or paste manually.');
+    } else {
+      showToast('Please add your essay — take a photo, upload an image, or paste text below.');
+    }
     return;
   }
 
-  showProcessing('Analysing writing quality against North American standards...');
+  // Check minimum length
+  const wordCount = essayText.split(/\s+/).filter(w => w.length > 0).length;
+  if (wordCount < 15) {
+    showToast(`Essay is too short (${wordCount} words). Please write at least a paragraph.`);
+    return;
+  }
+
+  showProcessing('Analysing your essay against North American standards...');
 
   try {
     const result = await gradeEssay(essayText);
+
+    // Validate we got a real result
+    if (!result || !result.total_score || !result.dimensions) {
+      throw new Error('Invalid response from AI');
+    }
+
     app.currentResult = result;
     app.currentResult.essaySnippet = essayText.slice(0, 60) + '...';
     app.currentResult.essayType = app.settings.essayType;
@@ -827,14 +883,23 @@ async function submitEssay() {
     document.getElementById('ocr-preview-container').style.display = 'none';
     document.getElementById('photo-grid-container').style.display = 'none';
     app.capturedImages = [];
+    // Reset camera Done button
+    document.getElementById('camera-done-btn').style.display = 'none';
+    document.getElementById('camera-count').style.display = 'block';
 
     renderResults(result, true);
     goTo('results');
 
   } catch(e) {
-    console.error(e);
+    console.error('Grading error:', e);
     goTo('import');
-    showToast('AI grading failed. Please check your internet and try again.');
+    if (e.message && e.message.includes('404')) {
+      showToast('API Key error (404). Please update your Gemini Key in the file.');
+    } else if (e.message && e.message.includes('429')) {
+      showToast('Too many requests. Please wait 1 minute and try again.');
+    } else {
+      showToast('AI grading failed. Check your internet connection and try again.');
+    }
   }
 }
 
